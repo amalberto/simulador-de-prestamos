@@ -10,12 +10,12 @@ if (localStorage.getItem('solicitudes')) {
 // Función para calcular el interés
 function calcularInteres(monto, tasa) {
     return (monto * tasa) / 100;
-} // Devuelve el interés según el monto y la tasa de interés
+}
 
 // Función para calcular la cuota
 function calcularCuota(monto, interes, cuotas) {
     return (monto + interes) / cuotas;
-} // Devuelve el valor de cada cuota sumando monto e interés, dividido por la cantidad de cuotas
+}
 
 // Función para registrar una nueva solicitud
 function registrarSolicitud(nombre, monto, cuotas, tasa) {
@@ -36,77 +36,88 @@ function registrarSolicitud(nombre, monto, cuotas, tasa) {
     solicitudes.push(nuevaSolicitud);
     guardarSolicitudes();
     renderizarSolicitudes();
-} // Calcula el préstamo, guarda la solicitud y actualiza
+}
 
-// Función para guardar solicitudes en el localstorage
+// Guardar solicitudes en localStorage
 function guardarSolicitudes() {
     localStorage.setItem('solicitudes', JSON.stringify(solicitudes));
 }
 
-// Función que crea un elemento nuevo que muestra una solicitud 
-function crearItemSolicitud(solicitud, index) {
-    const item = document.createElement('div');
-    item.className = 'list-group-item';
-
-    item.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h5>${solicitud.nombre}</h5>
-                <p>Monto solicitado: $${solicitud.monto}</p>
-                <p>Interés (${solicitud.tasa}%): $${solicitud.interes}</p>
-                <p>Total a pagar: $${solicitud.total}</p>
-                <p>Cuotas: ${solicitud.cuotas} cuotas de $${parseInt(solicitud.cuota * 100) / 100}</p>
-            </div>
-            <button class="btn btn-sm btn-danger" onclick="eliminarSolicitud(${index})">Eliminar</button>
-        </div> 
-    `; // se agrega un botón que dispara a través de un evento la función 'eliminarSolicitud' que elimina dicha solicitud de forma individual
-    return item;
-}
-
-// Función que renderiza las solicitudes en el DOM
+// Función para renderizar todas las solicitudes
 function renderizarSolicitudes() {
     const contenedor = document.getElementById('solicitudesContainer');
-    contenedor.innerHTML = '';
+    let html = '';
 
-    solicitudes.forEach((solicitud, index) => {
-        contenedor.appendChild(crearItemSolicitud(solicitud, index));
-    });
+    for (let i = 0; i < solicitudes.length; i++) {
+        const s = solicitudes[i];
+        html += `
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5>${s.nombre}</h5>
+                        <p>Monto solicitado: $${s.monto}</p>
+                        <p>Interés (${s.tasa}%): $${s.interes}</p>
+                        <p>Total a pagar: $${s.total}</p>
+                        <p>Cuotas: ${s.cuotas} cuotas de $${s.cuota.toFixed(2)}</p>
+                    </div>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarSolicitud(${i})">Eliminar</button>
+                </div>
+            </div>
+        `;
+    }
+
+    contenedor.innerHTML = html;
 }
 
-// Función que elimina una solicitud de préstamo en particular 
+// Función para eliminar una solicitud individual
 function eliminarSolicitud(indice) {
-    solicitudes.splice(indice, 1); // Elimina 1 elemento en la posición 'indice'
-    guardarSolicitudes();          // Actualiza el localstorage
-    renderizarSolicitudes();       // Actualiza el DOM
-    document.getElementById('totalSolicitudes').innerText = ''; // Limpia el total mostrado
+    solicitudes.splice(indice, 1);
+    guardarSolicitudes();
+    renderizarSolicitudes();
+    document.getElementById('totalSolicitudes').innerHTML = '';
 }
 
-// Función que maneja la lógica del registro de una solicitud
+// Función para mostrar mensajes
+function mostrarMensaje(tipo, texto) {
+    return `<div class="alert alert-${tipo} text-center" role="alert">${texto}</div>`;
+}
+
+// Función que maneja el registro de la solicitud
 function manejarRegistro() {
     const nombre = document.getElementById('nombre').value.trim();
     const monto = parseFloat(document.getElementById('monto').value);
     const cuotas = parseInt(document.getElementById('cuotas').value);
     const tasa = parseFloat(document.getElementById('tasa').value);
 
-    const mensajeError = document.getElementById('mensajeError');
-    const mensajeExito = document.getElementById('mensajeExito');
     const mensajeFiltro = document.getElementById('mensajeFiltro');
+    mensajeFiltro.classList.add('d-none');
 
     if (validarFormulario(nombre, monto, cuotas, tasa)) {
         registrarSolicitud(nombre, monto, cuotas, tasa);
         document.getElementById('formSolicitud').reset();
-        mensajeError.classList.add('d-none'); // 
-        mensajeExito.classList.remove('d-none'); 
-        mensajeExito.innerText = 'Tu solicitud fue registrada correctamente';
-        mensajeFiltro.classList.add('d-none'); 
+
+        const mensajeExito = document.getElementById('mensajeExito');
+        const mensajeError = document.getElementById('mensajeError');
+
+        mensajeExito.innerHTML = 'Tu solicitud fue registrada correctamente';
+        mensajeExito.classList.remove('d-none');
+
+        mensajeError.classList.add('d-none');
+        mensajeError.innerHTML = '';
     } else {
-        mensajeError.innerText = 'No has ingresado correctamente todos los campos del fomulario. Intentá de nuevo, por favor';
-        mensajeError.classList.remove('d-none'); 
-        mensajeExito.classList.add('d-none'); 
-    } // También maneja la aparición o desaparación de mensajes que le indican al usuario si la solicitud fue registrada éxitosamente o si hubo un error
+        const mensajeExito = document.getElementById('mensajeExito');
+        const mensajeError = document.getElementById('mensajeError');
+
+        mensajeError.innerHTML = 'Completá correctamente todos los campos del formulario.';
+        mensajeError.classList.remove('d-none');
+
+        mensajeExito.classList.add('d-none');
+        mensajeExito.innerHTML = '';
+    }
+
 }
 
-// Función que valida el formulario
+// Validar datos del formulario
 function validarFormulario(nombre, monto, cuotas, tasa) {
     return (
         nombre !== '' &&
@@ -114,108 +125,101 @@ function validarFormulario(nombre, monto, cuotas, tasa) {
         !isNaN(cuotas) && [3, 6, 9, 12].includes(cuotas) &&
         !isNaN(tasa) && tasa >= 0
     );
-} // Valida los datos ingresados en el formulario
+}
 
-// Función que usa reduce para calcular el total solicitado
+// Calcular y mostrar el total solicitado
 function calcularTotalSolicitudes() {
     const contenedor = document.getElementById('solicitudesContainer');
     const mensajeFiltro = document.getElementById('mensajeFiltro');
 
-    mensajeFiltro.classList.add('d-none'); // Oculta mensaje del filtro si está activado
+    mensajeFiltro.classList.add('d-none');
 
     if (solicitudes.length === 0) {
-        contenedor.innerHTML = `
-            <div class="alert alert-warning text-center" role="alert">
-                No se encontró ninguna solicitud registrada.
-            </div>
-        `;
-        document.getElementById('totalSolicitudes').innerText = '';
+        contenedor.innerHTML = mostrarMensaje('warning', 'No se encontró ninguna solicitud registrada.');
+        document.getElementById('totalSolicitudes').innerHTML = '';
     } else {
-        const total = solicitudes.reduce((acumulador, solicitud) => acumulador + solicitud.monto, 0);
+        const total = solicitudes.reduce((acc, solicitud) => acc + solicitud.monto, 0);
         mostrarTotalSolicitudes(total);
     }
 }
 
-// Función para mostrar el total de solicitudes en el DOM
+// Mostrar total solicitado
 function mostrarTotalSolicitudes(total) {
     const contenedor = document.getElementById('totalSolicitudes');
-
-    if (solicitudes.length === 0) {
-        contenedor.innerText = 'No hay solicitudes registradas.';
-    } else {
-        contenedor.innerText = `Total de dinero solicitado: $${total}`;
-    }
+    contenedor.innerHTML = `<div class="text-success text-center fw-bold">Total de dinero solicitado: $${total}</div>`;
 }
 
-// Función que maneja el calculo del total
+// Manejar el botón "Calcular Total Solicitado"
 function manejarCalculoTotal() {
-    manejarMostrarTodas();  
+    manejarMostrarTodas();
     calcularTotalSolicitudes();
 }
 
-// Función que maneja el filtrado de cuotas
+// Filtrar por cuotas
 function manejarFiltro() {
     const cuotasSeleccionadas = parseInt(document.getElementById('filtroCuotas').value);
     const mensajeFiltro = document.getElementById('mensajeFiltro');
 
     if (!isNaN(cuotasSeleccionadas)) {
-        const filtradas = solicitudes.filter((solicitud) => solicitud.cuotas === cuotasSeleccionadas);
+        const filtradas = [];
+
+        for (const solicitud of solicitudes) {
+            if (solicitud.cuotas === cuotasSeleccionadas) {
+                filtradas.push(solicitud);
+            }
+        }
 
         if (filtradas.length === 0) {
-            // En caso de no encontrar resultados para esa cantidad de cuotas
-            mensajeFiltro.className = 'alert alert-warning text-center';
-            mensajeFiltro.innerText = `No se encontraron solicitudes realizadas en ${cuotasSeleccionadas} cuotas.`;
-            mensajeFiltro.classList.remove('d-none');
-            document.getElementById('solicitudesContainer').innerHTML = '';
+            mensajeFiltro.innerHTML = mostrarMensaje('warning', `No se encontraron solicitudes en ${cuotasSeleccionadas} cuotas.`);
         } else {
-            // En caso de encontrar solicitudes
-            mensajeFiltro.className = 'alert alert-info text-center';
-            mensajeFiltro.innerText = `Mostrando solicitudes con ${cuotasSeleccionadas} cuotas.`;
-            mensajeFiltro.classList.remove('d-none');
+            mensajeFiltro.innerHTML = mostrarMensaje('info', `Mostrando solicitudes en ${cuotasSeleccionadas} cuotas.`);
             renderizarSolicitudesFiltradas(filtradas);
         }
+
+        mensajeFiltro.classList.remove('d-none');
     }
 }
 
-// Función que maneja la aparición de todas las solicitudes
+// Mostrar todas las solicitudes
 function manejarMostrarTodas() {
     const mensajeFiltro = document.getElementById('mensajeFiltro');
-
-    mensajeFiltro.classList.add('d-none'); // Oculta el mensaje del filtro si se encontraba aplicado
+    mensajeFiltro.classList.add('d-none');
 
     if (solicitudes.length === 0) {
-        const contenedor = document.getElementById('solicitudesContainer');
-        contenedor.innerHTML = `
-            <div class="alert alert-warning text-center" role="alert">
-                No se encontraron solicitudes registradas.
-            </div>
-        `;
+        document.getElementById('solicitudesContainer').innerHTML = mostrarMensaje('warning', 'No se encontraron solicitudes registradas.');
     } else {
         renderizarSolicitudes();
     }
 }
 
-// Función que hace render de aquellas solicitudes que fueron filtradas por el usuario
+// Renderizar solicitudes filtradas
 function renderizarSolicitudesFiltradas(arraySolicitudes) {
     const contenedor = document.getElementById('solicitudesContainer');
-    contenedor.innerHTML = '';
+    let html = '';
 
-    arraySolicitudes.forEach((solicitud, index) => {
-        contenedor.appendChild(crearItemSolicitud(solicitud, index));
-    });
+    for (let i = 0; i < arraySolicitudes.length; i++) {
+        const s = arraySolicitudes[i];
+        html += `
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5>${s.nombre}</h5>
+                        <p>Monto solicitado: $${s.monto}</p>
+                        <p>Interés (${s.tasa}%): $${s.interes}</p>
+                        <p>Total a pagar: $${s.total}</p>
+                        <p>Cuotas: ${s.cuotas} cuotas de $${s.cuota.toFixed(2)}</p>
+                    </div>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarSolicitud(${i})">Eliminar</button>
+                </div>
+            </div>
+        `;
+    }
+
+    contenedor.innerHTML = html;
 }
 
-// Eventos que manejan la lógica general y disparan la ejecución de las funciones
-const botonRegistrar = document.getElementById('btnRegistrar');
-botonRegistrar.addEventListener('click', manejarRegistro);
-
-const botonTotal = document.getElementById('btnTotalSolicitudes');
-if (botonTotal) {
-    botonTotal.addEventListener('click', manejarCalculoTotal);
-}
-
-const btnFiltrar = document.getElementById('btnFiltrarCuotas');
-btnFiltrar.addEventListener('click', manejarFiltro);
-
-const btnMostrarTodas = document.getElementById('btnMostrarTodas');
-btnMostrarTodas.addEventListener('click', manejarMostrarTodas);
+// Eventos principales
+document.getElementById('btnRegistrar').addEventListener('click', manejarRegistro);
+document.getElementById('btnTotalSolicitudes').addEventListener('click', manejarCalculoTotal);
+document.getElementById('btnFiltrarCuotas').addEventListener('click', manejarFiltro);
+document.getElementById('btnMostrarTodas').addEventListener('click', manejarMostrarTodas);
