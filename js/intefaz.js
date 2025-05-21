@@ -79,7 +79,57 @@ export async function inicializarApp() {
     document.getElementById("btnTotalSolicitudes").addEventListener("click", calcularTotalSolicitudes);
     document.getElementById("btnFiltrarCuotas").addEventListener("click", manejarFiltro);
     document.getElementById("btnMostrarTodas").addEventListener("click", manejarMostrarTodas);
-    document.getElementById("btnEliminarTodas").addEventListener("click", () => eliminarTodasLasSolicitudes(renderizarSolicitudes));
+    document.getElementById("btnEliminarTodas").addEventListener("click", () => {
+    const tipoFiltrado = document.getElementById('filtroTipo').value;
+
+    if (tipoFiltrado !== '') {
+        Swal.fire({
+            title: 'Filtro activo',
+            text: 'Se están mostrando solo solicitudes filtradas. Se mostrarán todas antes de continuar.',
+            icon: 'info',
+            confirmButtonText: 'Entendido'
+        }).then(() => {
+            document.getElementById('filtroTipo').value = '';
+            document.getElementById('mensajeFiltro').classList.add('d-none');
+            renderizarSolicitudes();
+
+            // Segunda confirmación
+            setTimeout(() => {
+                Swal.fire({
+                    title: '¿Eliminar todas las solicitudes?',
+                    text: 'Esta acción no se puede deshacer.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#6b46c1',
+                    cancelButtonColor: '#555',
+                    confirmButtonText: 'Sí, eliminar todo',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        eliminarTodasLasSolicitudes(renderizarSolicitudes);
+                    }
+                });
+            }, 200);
+        });
+    } else {
+        // Sin filtro: confirmación directa
+        Swal.fire({
+            title: '¿Eliminar todas las solicitudes?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#6b46c1',
+            cancelButtonColor: '#555',
+            confirmButtonText: 'Sí, eliminar todo',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                eliminarTodasLasSolicitudes(renderizarSolicitudes);
+            }
+        });
+    }
+});
+
 }
 
 export function esPreaprobado(solicitud, tipo) {
@@ -190,21 +240,29 @@ function renderizarSolicitudes() {
     const contenedor = document.getElementById('solicitudesContainer');
     let html = '';
 
-    if (solicitudes.length === 0) {
+    const btnTotal = document.getElementById('btnTotalSolicitudes');
+    const btnEliminarTodas = document.getElementById('btnEliminarTodas');
+    const estaEditando = indiceEnEdicionRef.value !== null;
+    const haySolicitudes = solicitudes.length > 0;
+
+    if (!haySolicitudes) {
         contenedor.innerHTML = `
             <div class="alert alert-warning text-center" role="alert">
                 No hay solicitudes registradas.
             </div>
         `;
+        btnTotal.disabled = true;
+        btnTotal.classList.remove('btn-success');
+        btnTotal.classList.add('btn-secondary');
+        btnEliminarTodas.disabled = true;
+        btnEliminarTodas.classList.remove('btn-danger');
+        btnEliminarTodas.classList.add('btn-secondary');
         return;
     }
 
     for (let i = 0; i < solicitudes.length; i++) {
         const s = solicitudes[i];
-
-        const tipoDetectado = tiposPrestamo.find(tp =>
-            tp.tipo === s.tipo
-        ) || {
+        const tipoDetectado = tiposPrestamo.find(tp => tp.tipo === s.tipo) || {
             tipo: "Desconocido",
             cuotasMin: 1,
             cuotasMax: 12,
@@ -217,8 +275,8 @@ function renderizarSolicitudes() {
 
         if (indiceEnEdicionRef.value === i) {
             const { ayudaMonto, ayudaCuotas, opcionesCuotas } = generarAyudasYCuotasHTML(tipoDetectado, s.cuotas);
-
             const tasaHTML = generarTasaHTML(tipoDetectado, s.tasa);
+
             html += `
                 <div class="list-group-item fade-in">
                     <div class="d-flex justify-content-between align-items-start flex-wrap">
@@ -271,8 +329,7 @@ function renderizarSolicitudes() {
                                 ${resultado.aprobado ? 'Preaprobado' : 'No aprobado'}
                             </button>
                         </div>
-                         ${generarBotonesAcciones(i)}
-
+                        ${generarBotonesAcciones(i)}
                     </div>
                 </div>
             `;
@@ -281,20 +338,16 @@ function renderizarSolicitudes() {
 
     contenedor.innerHTML = html;
 
-    const btnEliminarTodas = document.getElementById('btnEliminarTodas');
-    btnEliminarTodas.disabled = indiceEnEdicionRef.value !== null || solicitudes.length === 0;
+    btnTotal.disabled = estaEditando || !haySolicitudes;
+    btnTotal.classList.toggle('btn-success', !btnTotal.disabled);
+    btnTotal.classList.toggle('btn-secondary', btnTotal.disabled);
 
-    const btnTotal = document.getElementById('btnTotalSolicitudes');
-    if (indiceEnEdicionRef.value !== null || solicitudes.length === 0) {
-        btnTotal.disabled = true;
-        btnTotal.classList.remove('btn-success');
-        btnTotal.classList.add('btn-secondary');
-    } else {
-        btnTotal.disabled = false;
-        btnTotal.classList.add('btn-success');
-        btnTotal.classList.remove('btn-secondary');
-    }
+    btnEliminarTodas.disabled = estaEditando || !haySolicitudes;
+    btnEliminarTodas.classList.toggle('btn-danger', !btnEliminarTodas.disabled);
+    btnEliminarTodas.classList.toggle('btn-secondary', btnEliminarTodas.disabled);
 }
+
+
 
 
 function mostrarToast(mensaje) {
