@@ -108,6 +108,13 @@ export function eliminarSolicitud(indice, renderizarSolicitudesFn) {
     renderizarSolicitudesFn();
     document.getElementById('totalSolicitudes').innerHTML = '';
     document.getElementById('btnEliminarTodas').disabled = solicitudes.length === 0;
+    const btnTotal = document.getElementById('btnTotalSolicitudes');
+    if (solicitudes.length === 0 || indiceEnEdicionRef.value !== null) {
+        btnTotal.disabled = true;
+        btnTotal.classList.remove('btn-success');
+        btnTotal.classList.add('btn-secondary');
+    }
+
 }
 
 export function eliminarTodasLasSolicitudes(renderizarSolicitudesFn) {
@@ -123,6 +130,13 @@ export function eliminarTodasLasSolicitudes(renderizarSolicitudesFn) {
             solicitudes.length = 0;
             guardarSolicitudes();
             renderizarSolicitudesFn();
+            const btnTotal = document.getElementById('btnTotalSolicitudes');
+            if (btnTotal) {
+                btnTotal.disabled = true;
+                btnTotal.classList.remove('btn-success');
+                btnTotal.classList.add('btn-secondary');
+            }
+
             Swal.fire('Hecho', 'Todas las solicitudes han sido eliminadas.', 'success');
         }
     });
