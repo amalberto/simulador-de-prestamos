@@ -1,9 +1,9 @@
-Proyecto: Simulador de préstamos
+## Proyecto: Simulador de préstamos
 
 Este es un simulador de préstamos, hecho con HTML, CSS y JavaScript. Podés ingresar, modificar, buscar, eliminar, filtrar, imprimir, y simular distintos tipos de créditos como, hipotecario, automotor, de estudios, entre otros. 
 
 
-🧩 Cosas que hace 
+## 🧩 Cosas que hace 
 
 - Te permite ingresar un pedido que: 
 - contiene el nombre del cliente 
@@ -24,7 +24,7 @@ Al ingresar un pedido se genera una vista que:
 
 --- 
 
-▶️ ¿Cómo se usa? 
+## ▶️ ¿Cómo se usa? 
 
 1. Elegí qué crédito querés del menú desplegable.
 2. Llená los espacios del formulario: 
@@ -44,14 +44,14 @@ Al ingresar un pedido se genera una vista que:
 
 --- 
 
-📋 Cosas que valida
+## 📋 Cosas que valida
 
 - Nombre y apellido con la primera letra mayúscula, mínimo tres letras para nombre y dos para apellido.
 - Monto del pedido dentro de los rangos permitidos, según el tipo de préstamo seleccionado. 
 - Cuotas dentro del rango seleccionable, según el tipo.  
 - No permite registrar la solicitud si faltan datos o son erroneos.
 
-💽 Tecnologías utilizadas
+## 💽 Tecnologías utilizadas
 
 - HTML5 
 - Maquetado con CSS y Bootstrap 
