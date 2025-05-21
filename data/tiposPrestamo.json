@@ -1,0 +1,63 @@
+[
+    {
+        "tipo": "Hipotecario",
+        "tasa": 0,
+        "nombreTasa": "Tasa UVA",
+        "editableTasa": false,
+        "montoMin": 1000000,
+        "montoMax": 50000000,
+        "cuotasMin": 60,
+        "cuotasMax": 360,
+        "descripcion": "Préstamos para tu propiedad. Monto entre $1.000.000 y $50.000.000. Cuotas entre 60 y 360."
+    },
+    {
+        "tipo": "Automotor",
+        "tasa": 15,
+        "editableTasa": false,
+        "montoMin": 300000,
+        "montoMax": 10000000,
+        "cuotasMin": 12,
+        "cuotasMax": 84,
+        "descripcion": "Financiación de vehículos. Monto entre $500.000 y $10.000.000. Cuotas entre 12 y 84."
+    },
+    {
+        "tipo": "Estudios",
+        "tasa": 20,
+        "editableTasa": false,
+        "montoMin": 50000,
+        "montoMax": 1000000,
+        "cuotasMin": 6,
+        "cuotasMax": 36,
+        "descripcion": "Préstamos para completar tu educación. Monto entre $50.000 y $1.000.000. Cuotas entre 6 y 36."
+    },
+    {
+        "tipo": "Personal",
+        "tasa": 25,
+        "editableTasa": false,
+        "montoMin": 10000,
+        "montoMax": 500000,
+        "cuotasMin": 3,
+        "cuotasMax": 24,
+        "descripcion": "Préstamos para lo que vos quieras. Monto entre $10.000 y $500.000. Cuotas entre 3 y 24."
+    },
+    {
+        "tipo": "Emprendimiento",
+        "tasa": 30,
+        "editableTasa": false,
+        "montoMin": 20000,
+        "montoMax": 2000000,
+        "cuotasMin": 6,
+        "cuotasMax": 60,
+        "descripcion": "Capital para tu negocio. Monto entre $50.000 y $2.000.000. Cuotas entre 6 y 60."
+    },
+    {
+        "tipo": "Simulación",
+        "tasa": null,
+        "editableTasa": true,
+        "montoMin": 1,
+        "montoMax": "infinito",
+        "cuotasMin": 1,
+        "cuotasMax": 360,
+        "descripcion": "Modo de pruebas. Ingresá todos los valores manualmente."
+    }
+]
