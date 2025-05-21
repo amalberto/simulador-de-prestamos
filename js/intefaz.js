@@ -92,8 +92,6 @@ export async function inicializarApp() {
             document.getElementById('filtroTipo').value = '';
             document.getElementById('mensajeFiltro').classList.add('d-none');
             renderizarSolicitudes();
-
-            // Segunda confirmación
             setTimeout(() => {
                 Swal.fire({
                     title: '¿Eliminar todas las solicitudes?',
@@ -112,7 +110,6 @@ export async function inicializarApp() {
             }, 200);
         });
     } else {
-        // Sin filtro: confirmación directa
         Swal.fire({
             title: '¿Eliminar todas las solicitudes?',
             text: 'Esta acción no se puede deshacer.',
