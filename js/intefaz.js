@@ -429,8 +429,15 @@ function manejarFiltro() {
 
 function manejarMostrarTodas() {
     document.getElementById('mensajeFiltro').classList.add('d-none');
+    document.getElementById('totalSolicitudes').innerHTML = '';
+    const btnTotal = document.getElementById('btnTotalSolicitudes');
+    btnTotal.disabled = true;
+    btnTotal.classList.remove('btn-success');
+    btnTotal.classList.add('btn-secondary');
+
     renderizarSolicitudes();
 }
+
 
 function renderizarSolicitudesFiltradas(arraySolicitudes) {
     const contenedor = document.getElementById('solicitudesContainer');
