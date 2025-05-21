@@ -16,57 +16,77 @@ window.eliminarTodasLasSolicitudes = () => eliminarTodasLasSolicitudes(renderiza
 window.imprimirSolicitud = function (indice) {
     const solicitud = solicitudes[indice];
 
-    const contenido = `
-    <html>
-    <head>
-        <title>Imprimir Solicitud</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                padding: 40px;
-                background: #f8f9fa;
-            }
-            .recuadro {
-                border: 1px solid #333;
-                border-radius: 10px;
-                padding: 20px;
-                margin-bottom: 20px;
-                background: white;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                max-width: 500px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            h2 {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .dato {
-                margin: 8px 0;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="recuadro">
-            <h2>Solicitud de Préstamo</h2>
-            <div class="dato"><strong>Cliente:</strong> ${solicitud.nombre}</div>
-            <div class="dato"><strong>Tipo de Préstamo:</strong> ${solicitud.tipo}</div>
-            <div class="dato"><strong>Monto Solicitado:</strong> $${solicitud.monto.toLocaleString()}</div>
-            <div class="dato"><strong>Tasa de Interés:</strong> ${solicitud.tasa}%</div>
-            <div class="dato"><strong>Cuotas:</strong> ${solicitud.cuotas} cuotas de $${solicitud.cuota.toFixed(2)}</div>
-            <div class="dato"><strong>Total a Pagar:</strong> $${solicitud.total.toLocaleString()}</div>
-        </div>
-    </body>
-    </html>
+    const htmlCompleto = `
+        <!DOCTYPE html>
+        <html>
+<head>
+    <meta charset="UTF-8">
+    <title>Imprimir Solicitud</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        .recuadro {
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .dato {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+
+        <body>
+            <div class="recuadro">
+                <h2>Solicitud de Préstamo</h2>
+                <div class="dato"><strong>Cliente:</strong> ${solicitud.nombre}</div>
+                <div class="dato"><strong>Tipo de Préstamo:</strong> ${solicitud.tipo}</div>
+                <div class="dato"><strong>Monto Solicitado:</strong> $${solicitud.monto.toLocaleString()}</div>
+                <div class="dato"><strong>Tasa de Interés:</strong> ${solicitud.tasa}%</div>
+                <div class="dato"><strong>Cuotas:</strong> ${solicitud.cuotas} cuotas de $${solicitud.cuota.toFixed(2)}</div>
+                <div class="dato"><strong>Total a Pagar:</strong> $${solicitud.total.toLocaleString()}</div>
+            </div>
+        </body>
+        </html>
     `;
 
-    const ventana = window.open('', '', 'width=700,height=700');
-    ventana.document.write(contenido);
-    ventana.document.close();
-    ventana.focus();
-    ventana.print();
-    ventana.close();
+    const blob = new Blob([htmlCompleto], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const ventana = window.open(url, '_blank');
+
+    if (!ventana) {
+        Swal.fire('Error', 'No se pudo abrir la ventana de impresión. Verificá los bloqueadores.', 'error');
+        return;
+    }
+
+    const imprimirCuandoCargue = () => {
+        ventana.removeEventListener('load', imprimirCuandoCargue);
+        setTimeout(() => {
+            ventana.focus();
+            ventana.print();
+            ventana.close();
+            URL.revokeObjectURL(url);
+        }, 300);
+    };
+
+    ventana.addEventListener('load', imprimirCuandoCargue);
 };
+
+
+
 
 document.getElementById('btnImprimirTodas').addEventListener('click', () => {
     const tipoFiltrado = document.getElementById('filtroTipo').value;
@@ -309,7 +329,6 @@ function renderizarSolicitudes() {
             </div>
         `;
 
-        // Deshabilitar y aplicar estilos
         [btnTotal, btnEliminarTodas, btnImprimirTodas, btnFiltrar].forEach(btn => {
             btn.disabled = true;
             btn.classList.remove('btn-success', 'btn-danger', 'btn-info');
@@ -629,36 +648,6 @@ function imprimirVariasSolicitudes(lista) {
     }
 
     const contenido = `
-    <html>
-    <head>
-        <title>Solicitudes</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                padding: 40px;
-                background: #f8f9fa;
-            }
-            .recuadro {
-                border: 1px solid #333;
-                border-radius: 10px;
-                padding: 20px;
-                margin-bottom: 20px;
-                background: white;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                max-width: 600px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            h2 {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .dato {
-                margin: 8px 0;
-            }
-        </style>
-    </head>
-    <body>
         ${lista.map(s => `
             <div class="recuadro">
                 <h2>Solicitud de Préstamo</h2>
@@ -670,14 +659,56 @@ function imprimirVariasSolicitudes(lista) {
                 <div class="dato"><strong>Total a Pagar:</strong> $${s.total.toLocaleString()}</div>
             </div>
         `).join('')}
-    </body>
-    </html>
     `;
 
-    const ventana = window.open('', '', 'width=800,height=800');
-    ventana.document.write(contenido);
-    ventana.document.close();
-    ventana.focus();
-    ventana.print();
-    ventana.close();
+    const htmlCompleto = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Imprimir Solicitudes</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 40px;
+                    background: #f8f9fa;
+                }
+                .recuadro {
+                    border: 1px solid #333;
+                    border-radius: 10px;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                    background: white;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    max-width: 600px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                h2 {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .dato {
+                    margin: 8px 0;
+                }
+            </style>
+        </head>
+        <body>
+            ${contenido}
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob([htmlCompleto], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const ventana = window.open(url);
+
+    ventana.onload = () => {
+        ventana.focus();
+        ventana.print();
+        setTimeout(() => {
+            ventana.close();
+            URL.revokeObjectURL(url);
+        }, 2000);
+    };
 }
