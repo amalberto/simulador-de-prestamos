@@ -58,13 +58,15 @@ Al ingresar un pedido se genera una vista que:
 - Javascript con diseño modular para facilitar la lectura del código
 
 ## 📁 Estructura del proyecto
+
+```text
 .
 ├── index.html
 ├── styles.css
 ├── tiposPrestamo.json
 ├── js/
-│ ├── interfaz.js
-│ ├── solicitudes.js
-│ ├── tiposPrestamo.js
-│ └── main.js
+│   ├── interfaz.js
+│   ├── solicitudes.js
+│   ├── tiposPrestamo.js
+│   └── main.js
 └── README.md
