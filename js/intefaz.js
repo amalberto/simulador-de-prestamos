@@ -68,6 +68,56 @@ window.imprimirSolicitud = function (indice) {
     ventana.close();
 };
 
+document.getElementById('btnImprimirTodas').addEventListener('click', () => {
+    const tipoFiltrado = document.getElementById('filtroTipo').value;
+
+    if (solicitudes.length === 0) return;
+
+    if (tipoFiltrado !== '') {
+        const solicitudesFiltradas = solicitudes.filter(s => s.tipo === tipoFiltrado);
+
+        if (solicitudesFiltradas.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sin solicitudes para imprimir',
+                html: `No hay solicitudes registradas del tipo <strong>${tipoFiltrado}</strong>.`,
+                showCancelButton: true,
+                confirmButtonText: 'Imprimir todas',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    imprimirVariasSolicitudes(solicitudes);
+                }
+            });
+        } else {
+            Swal.fire({
+                icon: 'question',
+                title: 'Filtro activo',
+                html: `¿Querés imprimir solo las solicitudes del tipo <strong>${tipoFiltrado}</strong>?`,
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Sí, solo filtradas',
+                denyButtonText: 'No, imprimir todas',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#6f42c1',
+                denyButtonColor: '#343a40',
+                cancelButtonColor: '#6c757d'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    imprimirVariasSolicitudes(solicitudesFiltradas);
+                } else if (result.isDenied) {
+                    imprimirVariasSolicitudes(solicitudes);
+                }
+            });
+        }
+    } else {
+        imprimirVariasSolicitudes(solicitudes);
+    }
+});
+
+
 let tiposPrestamo = [];
 const indiceEnEdicionRef = { value: null };
 
@@ -80,52 +130,52 @@ export async function inicializarApp() {
     document.getElementById("btnFiltrarCuotas").addEventListener("click", manejarFiltro);
     document.getElementById("btnMostrarTodas").addEventListener("click", manejarMostrarTodas);
     document.getElementById("btnEliminarTodas").addEventListener("click", () => {
-    const tipoFiltrado = document.getElementById('filtroTipo').value;
+        const tipoFiltrado = document.getElementById('filtroTipo').value;
 
-    if (tipoFiltrado !== '') {
-        Swal.fire({
-            title: 'Filtro activo',
-            text: 'Se están mostrando solo solicitudes filtradas. Se mostrarán todas antes de continuar.',
-            icon: 'info',
-            confirmButtonText: 'Entendido'
-        }).then(() => {
-            document.getElementById('filtroTipo').value = '';
-            document.getElementById('mensajeFiltro').classList.add('d-none');
-            renderizarSolicitudes();
-            setTimeout(() => {
-                Swal.fire({
-                    title: '¿Eliminar todas las solicitudes?',
-                    text: 'Esta acción no se puede deshacer.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#6b46c1',
-                    cancelButtonColor: '#555',
-                    confirmButtonText: 'Sí, eliminar todo',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        eliminarTodasLasSolicitudes(renderizarSolicitudes);
-                    }
-                });
-            }, 200);
-        });
-    } else {
-        Swal.fire({
-            title: '¿Eliminar todas las solicitudes?',
-            text: 'Esta acción no se puede deshacer.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#6b46c1',
-            cancelButtonColor: '#555',
-            confirmButtonText: 'Sí, eliminar todo',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                eliminarTodasLasSolicitudes(renderizarSolicitudes);
-            }
-        });
-    }
-});
+        if (tipoFiltrado !== '') {
+            Swal.fire({
+                title: 'Filtro activo',
+                text: 'Se están mostrando solo solicitudes filtradas. Se mostrarán todas antes de continuar.',
+                icon: 'info',
+                confirmButtonText: 'Entendido'
+            }).then(() => {
+                document.getElementById('filtroTipo').value = '';
+                document.getElementById('mensajeFiltro').classList.add('d-none');
+                renderizarSolicitudes();
+                setTimeout(() => {
+                    Swal.fire({
+                        title: '¿Eliminar todas las solicitudes?',
+                        text: 'Esta acción no se puede deshacer.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#6b46c1',
+                        cancelButtonColor: '#555',
+                        confirmButtonText: 'Sí, eliminar todo',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            eliminarTodasLasSolicitudes(renderizarSolicitudes);
+                        }
+                    });
+                }, 200);
+            });
+        } else {
+            Swal.fire({
+                title: '¿Eliminar todas las solicitudes?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#6b46c1',
+                cancelButtonColor: '#555',
+                confirmButtonText: 'Sí, eliminar todo',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    eliminarTodasLasSolicitudes(renderizarSolicitudes);
+                }
+            });
+        }
+    });
 
 }
 
@@ -233,12 +283,22 @@ function generarAyudasYCuotasHTML(tipo, valorSeleccionado) {
 }
 
 
+
+function actualizarBotonEstado(boton, habilitado, claseActiva, claseInactiva) {
+    boton.disabled = !habilitado;
+    boton.classList.toggle(claseActiva, habilitado);
+    boton.classList.toggle(claseInactiva, !habilitado);
+}
+
 function renderizarSolicitudes() {
     const contenedor = document.getElementById('solicitudesContainer');
     let html = '';
 
     const btnTotal = document.getElementById('btnTotalSolicitudes');
     const btnEliminarTodas = document.getElementById('btnEliminarTodas');
+    const btnImprimirTodas = document.getElementById('btnImprimirTodas');
+    const btnFiltrar = document.getElementById('btnFiltrarCuotas');
+
     const estaEditando = indiceEnEdicionRef.value !== null;
     const haySolicitudes = solicitudes.length > 0;
 
@@ -248,12 +308,14 @@ function renderizarSolicitudes() {
                 No hay solicitudes registradas.
             </div>
         `;
-        btnTotal.disabled = true;
-        btnTotal.classList.remove('btn-success');
-        btnTotal.classList.add('btn-secondary');
-        btnEliminarTodas.disabled = true;
-        btnEliminarTodas.classList.remove('btn-danger');
-        btnEliminarTodas.classList.add('btn-secondary');
+
+        // Deshabilitar y aplicar estilos
+        [btnTotal, btnEliminarTodas, btnImprimirTodas, btnFiltrar].forEach(btn => {
+            btn.disabled = true;
+            btn.classList.remove('btn-success', 'btn-danger', 'btn-info');
+            btn.classList.add('btn-secondary');
+        });
+
         return;
     }
 
@@ -335,17 +397,20 @@ function renderizarSolicitudes() {
 
     contenedor.innerHTML = html;
 
-    btnTotal.disabled = estaEditando || !haySolicitudes;
-    btnTotal.classList.toggle('btn-success', !btnTotal.disabled);
-    btnTotal.classList.toggle('btn-secondary', btnTotal.disabled);
+    // Botón Calcular Total
+    actualizarBotonEstado(btnTotal, !estaEditando && haySolicitudes, 'btn-success', 'btn-secondary');
 
-    btnEliminarTodas.disabled = estaEditando || !haySolicitudes;
-    btnEliminarTodas.classList.toggle('btn-danger', !btnEliminarTodas.disabled);
-    btnEliminarTodas.classList.toggle('btn-secondary', btnEliminarTodas.disabled);
+    // Botón Eliminar Todas
+    actualizarBotonEstado(btnEliminarTodas, !estaEditando && haySolicitudes, 'btn-danger', 'btn-secondary');
+
+    // Botón Imprimir Todas
+    actualizarBotonEstado(btnImprimirTodas, !estaEditando && haySolicitudes, 'btn-info', 'btn-secondary');
+
+    // Botón Filtrar
+    btnFiltrar.disabled = estaEditando || !haySolicitudes;
+    btnFiltrar.classList.toggle('btn-info', !btnFiltrar.disabled);
+    btnFiltrar.classList.toggle('btn-secondary', btnFiltrar.disabled);
 }
-
-
-
 
 function mostrarToast(mensaje) {
     const toastBody = document.getElementById('toastBody');
@@ -478,6 +543,7 @@ function manejarFiltro() {
 }
 
 function manejarMostrarTodas() {
+    document.getElementById('filtroTipo').value = '';
     document.getElementById('mensajeFiltro').classList.add('d-none');
     document.getElementById('totalSolicitudes').innerHTML = '';
     const btnTotal = document.getElementById('btnTotalSolicitudes');
@@ -534,8 +600,8 @@ function renderizarSolicitudesFiltradas(arraySolicitudes) {
                             })">
                             ${resultado.aprobado ? 'Preaprobado' : 'No aprobado'}
                         </button>
-                        ${generarBotonesAcciones(i)}
                     </div>
+                                            ${generarBotonesAcciones(i)}
                 </div>
             </div>
         `;
@@ -556,5 +622,62 @@ function renderizarSolicitudesFiltradas(arraySolicitudes) {
 }
 
 
+function imprimirVariasSolicitudes(lista) {
+    if (!lista.length) {
+        Swal.fire('Sin solicitudes', 'No hay solicitudes para imprimir.', 'info');
+        return;
+    }
 
+    const contenido = `
+    <html>
+    <head>
+        <title>Solicitudes</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 40px;
+                background: #f8f9fa;
+            }
+            .recuadro {
+                border: 1px solid #333;
+                border-radius: 10px;
+                padding: 20px;
+                margin-bottom: 20px;
+                background: white;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            h2 {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .dato {
+                margin: 8px 0;
+            }
+        </style>
+    </head>
+    <body>
+        ${lista.map(s => `
+            <div class="recuadro">
+                <h2>Solicitud de Préstamo</h2>
+                <div class="dato"><strong>Cliente:</strong> ${s.nombre}</div>
+                <div class="dato"><strong>Tipo de Préstamo:</strong> ${s.tipo}</div>
+                <div class="dato"><strong>Monto Solicitado:</strong> $${s.monto.toLocaleString()}</div>
+                <div class="dato"><strong>Tasa de Interés:</strong> ${s.tasa}%</div>
+                <div class="dato"><strong>Cuotas:</strong> ${s.cuotas} cuotas de $${s.cuota.toFixed(2)}</div>
+                <div class="dato"><strong>Total a Pagar:</strong> $${s.total.toLocaleString()}</div>
+            </div>
+        `).join('')}
+    </body>
+    </html>
+    `;
 
+    const ventana = window.open('', '', 'width=800,height=800');
+    ventana.document.write(contenido);
+    ventana.document.close();
+    ventana.focus();
+    ventana.print();
+    ventana.close();
+}
