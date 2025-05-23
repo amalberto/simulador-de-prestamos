@@ -240,7 +240,7 @@ export function esPreaprobado(solicitud, tipo) {
     } else {
         return {
             aprobado: false,
-            razon: `${motivo} Se requieren al menos <strong>${cuotasMinimasRequeridas}</strong>.`
+            razon: `${motivo} Se requieren al menos <strong>${cuotasMinimasRequeridas}</strong> cuotas.`
         };
     }
 }
